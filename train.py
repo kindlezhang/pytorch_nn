@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser() # 导入argparse模块，用于解析命令�
 parser.add_argument("--model_names", type=str, default="vit") # 添加命令行参数，指定模型名称，默认为"resnet18"
 parser.add_argument("--pre_trained", type=bool, default=False) #指定是否使用预训练模型，默认为False
 parser.add_argument("--classes_num", type=int, default=4) # 指定类别数，默认为4
-parser.add_argument("--dataset", type=str, default="data\COVID_19_Radiography_Dataset") # 指定数据集名称，默认为"new_COVID_19_Radiography_Dataset"
+parser.add_argument("--dataset", type=str, default="data/COVID_19_Radiography_Dataset") # 指定数据集名称，默认为"new_COVID_19_Radiography_Dataset"
 parser.add_argument("--batch_size", type=int, default=16) #   指定批量大小，默认为64
 parser.add_argument("--epoch", type=int, default=20) #  指定训练轮次数，默认为20
 parser.add_argument("--lr", type=float, default=0.01) #  指定学习率，默认为0.01
@@ -79,9 +79,9 @@ transform_test = transforms.Compose([transforms.Resize([224, 224]),
                                         transforms.ToTensor(),
                                         transforms.Normalize((0.3738, 0.3738, 0.3738),
                                                             (0.3240, 0.3240, 0.3240))])
-trainset = datasets.ImageFolder(root=os.path.join(r'dataset\COVID_19_Radiography_Dataset', 'train'),
+trainset = datasets.ImageFolder(root=os.path.join(r'data/COVID_19_Radiography_Dataset', 'train'),
                                 transform=transform_train)
-testset = datasets.ImageFolder(root=os.path.join(r'dataset\COVID_19_Radiography_Dataset', 'val'),
+testset = datasets.ImageFolder(root=os.path.join(r'data/COVID_19_Radiography_Dataset', 'val'),
                                 transform=transform_test)
 
 # 创建训练数据加载器

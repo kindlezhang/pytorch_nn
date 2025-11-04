@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from functools import partial
 
 class PatchEmbed(nn.Module):
     def __init__(self, img_size = 224, patch_size = 16, in_c = 3, embed_dim = 768, norm_layer = None):
@@ -68,7 +69,7 @@ class Mlp(nn.Module):
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
         self.fc1 = nn.Linear(in_features, hidden_features)
-        self.act = act_layer()
+        self.act = act_layer
         self.fc2 = nn.Linear(hidden_features, out_features)
         self.drop = nn.Dropout(drop)
 
@@ -99,7 +100,7 @@ class Block(nn.Module):
         # 如果 drop_path_ratio>0，则使用droppath,否则不做任何更改
         self.drop_path = DropPath(drop_path_ratio) if drop_path_ratio>0. else nn.Identity()
         self.norm2 = norm_layer(dim) # 定义第二个layer_norm层
-        mlph_hidden_dim = int(dim*mlp_ratio) # 计算mlp第一个全连接层的节点个数
+        mlp_hidden_dim = int(dim*mlp_ratio) # 计算mlp第一个全连接层的节点个数
         # 定义mlp层 传入dim=mlp_hidden dim
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer = act_layer, drop = drop_ratio)
 
@@ -121,10 +122,10 @@ class VisionTransformer(nn.Module):
         # 设置一个较小的参数防止分母为0
         norm_layer = norm_layer or partial(nn.LayerNorm, eps = 1e-6)
         act_layer = act_layer or nn.GELU()
-        self.path_embed = embed_layer(img_size=img_size, patch_size = patch_size, in_c = in_c, embed_dim = dmbed_dim)
-        num_patches = self.patch_embed.num_patches # 得到patches的个数
+        self.path_embed = embed_layer(img_size=img_size, patch_size = patch_size, in_c = in_c, embed_dim = embed_dim)
+        num_patches = self.path_embed.num_patches # 得到patches的个数
         # 使用nn.Parameter构建可训练的参数，用零矩阵进行初始化，第一个为batch的维度
-        self.cls_token = nn.Parameter(torch.size(1,1,embed_dim))
+        self.cls_token = nn.Parameter(torch.zeros(1,1,embed_dim))
         self.dist_token = nn.Parameter(torch.zeros(1,1,embed_dim)) if distilled else None
         # pos_embed大小与concat拼接之后的大小一致，197， 768
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches+self.num_tokens, embed_dim))
@@ -134,7 +135,7 @@ class VisionTransformer(nn.Module):
         # 使用nn.Sequential将列表中的所有模块打包为一个列表
         self.block = nn.Sequential(*[
             Block(dim = embed_dim, num_heads =num_heads, mlp_ratio = mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
-                  deop_ratio = drop_ratio, attn_drop_ratio = attn_drop_ratio, drop_path_ratio=dpr[i],
+                  drop_ratio = drop_ratio, attn_drop_ratio = attn_drop_ratio, drop_path_ratio=dpr[i],
                   norm_layer = norm_layer,act_layer = act_layer)
             for i in range(depth)
         ])
@@ -157,7 +158,7 @@ class VisionTransformer(nn.Module):
             self.head_dist = nn.Linear(self.embed_dim, self.num_classes) if num_classes>0 else nn.Identity()
 
         # 权重初始化
-        nn.init.torch_normal_(self.pos_embed, std = 0.02)
+        nn.init.trunc_normal_(self.pos_embed, std = 0.02)
         if self.dist_token is not None:
             nn.init.trunc_normal_(self.dist_token,std=0.02)
 
@@ -184,7 +185,7 @@ class VisionTransformer(nn.Module):
             return x[:,0],x[:,1]
         
     def forward(self, x):
-        x = self.foward_features(x)
+        x = self.forward_features(x)
         if self.head_dist is not None:
             x, x_dist = self.head(x[0]), self.head_dist(x[1])
             # 如果是训练模式且不是脚本模式
@@ -195,7 +196,7 @@ class VisionTransformer(nn.Module):
             x = self.head(x) # 最后的linear全连接层
         return x
     
-def _init_vit_weight(m):
+def _init_vit_weights(m):
     # 判断模块m是否是nn.Linear
     if isinstance(m, nn.Linear):
         nn.init.trunc_normal_(m.weight, std=0.01)
@@ -207,7 +208,7 @@ def _init_vit_weight(m):
         if m.bias is not None:
             nn.init.zeros_(m.bias)
 
-    elif isinstance(m, nn.layerNorm):
+    elif isinstance(m, nn.LayerNorm):
         nn.init.zeros_(m.bias)
         nn.init.ones_(m.weight) # 对层归一化的权重初始化为1
 
