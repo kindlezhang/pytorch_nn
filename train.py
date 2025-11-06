@@ -24,6 +24,7 @@ import torch.optim as optim  # PyTorch中的优化器
 from torch.utils.data import DataLoader  # PyTorch中用于加载数据的工具
 from tqdm import tqdm  # 用于在循环中显示进度条
 import os  # Python中的操作系统相关功能
+from model.cnn import simplecnn
 
 from torch.optim.lr_scheduler import CosineAnnealingLR  # 余弦退火学习率调度器
 import torch.nn.functional as F  # PyTorch中的函数库
