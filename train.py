@@ -19,15 +19,17 @@
 # 此视频出自B站up主DT算法工程师前钰
 import argparse  # 用于解析命令行参数
 import torch 
+import torch.nn as nn
 import torch.optim as optim  # PyTorch中的优化器
 from torch.utils.data import DataLoader  # PyTorch中用于加载数据的工具
 from tqdm import tqdm  # 用于在循环中显示进度条
+import os  # Python中的操作系统相关功能
+
 from torch.optim.lr_scheduler import CosineAnnealingLR  # 余弦退火学习率调度器
 import torch.nn.functional as F  # PyTorch中的函数库
 from torchvision import datasets  # PyTorch中的视觉数据集
 import torchvision.transforms as transforms  # PyTorch中的数据变换操作
 from tensorboardX import SummaryWriter  # 用于创建TensorBoard日志的工具
-import os  # Python中的操作系统相关功能
 from utils import AverageMeter, accuracy  # 自定义工具模块，用于计算模型的平均值和准确度
 from model import model_dict  # 自定义模型字典，包含了各种模型的定义
 import numpy as np  # NumPy库，用于数值计算
