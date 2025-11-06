@@ -12,7 +12,7 @@
 
 import sys
 sys.path.append(r"\Users\kindle\Desktop\file\project\pytorch_nn")
-from model.vit import vit_base_patch16_224
+from model.vit_2 import vit_base_patch16_224
 
 model_dict = {
     'vit' : vit_base_patch16_224,
