@@ -103,9 +103,12 @@ def train_one_epoch(model, optimizer, train_loader):
 
     for (inputs, targets) in tqdm(train_loader, desc="train"): # 遍历训练数据加载器 train_loader 中的每个批次数据，使用 tqdm 包装以显示进度条。
         # for i, (inputs, targets) in enumerate(train_loader):
-        if torch.cuda.is_available():  # 如果当前设备支持 CUDA 加速，则将输入数据和目标数据送到 GPU 上进行计算，设置 non_blocking=True 可以使数据异步加载，提高效率。
-            inputs = inputs.cuda(non_blocking=True)
-            targets = targets.cuda(non_blocking=True)
+        # if torch.cuda.is_available():  # 如果当前设备支持 CUDA 加速，则将输入数据和目标数据送到 GPU 上进行计算，设置 non_blocking=True 可以使数据异步加载，提高效率。
+        #     inputs = inputs.cuda(non_blocking=True)
+        #     targets = targets.cuda(non_blocking=True)
+
+        inputs = inputs.to(device).to(torch.float32)
+        targets = targets.to(device)
 
         out = model(inputs)
         loss = F.cross_entropy(out, targets)  # 计算损失（交叉熵损失）
@@ -130,9 +133,12 @@ def evaluation(model, test_loader):
     with torch.no_grad():
         for img, label in tqdm(test_loader, desc="Evaluating"):
             # for img, label in test_loader:   # 迭代测试数据加载器中的每个批次
-            if torch.cuda.is_available():
-                img = img.cuda()
-                label = label.cuda()
+            # if torch.cuda.is_available():
+            #     img = img.cuda()
+            #     label = label.cuda()
+
+            img = img.to(device).to(torch.float32)
+            label = label.to(device)
 
             out = model(img)
             acc = accuracy(out, label)[0]  # 计算准确度和损失
@@ -196,13 +202,26 @@ def train(model, optimizer, train_loader, test_loader, scheduler):
     f.close()
 
 if __name__ == "__main__":
+
+    args.model_names = "simplecnn"
     tb_path = "runs/{}/{}/{}".format(args.dataset, args.model_names,  # 创建 TensorBoard 日志目录路径
                                      args.exp_postfix)
     tb_writer = SummaryWriter(log_dir=tb_path)
     lr = args.lr
-    model = model_dict[args.model_names](num_classes=args.classes_num, pretrained=args.pre_trained)  # 根据命令行参数创建神经网络模型
+
     if torch.cuda.is_available():
-        model = model.cuda()
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    print(f"Using device: {device}")
+
+    model = model_dict[args.model_names](num_classes=args.classes_num, pretrained=args.pre_trained)  # 根据命令行参数创建神经网络模型
+    model = model.to(device)
+
+    # if torch.cuda.is_available():
+    #     model = model.cuda()
 
     optimizer = optim.SGD(  # 创建随机梯度下降 (SGD) 优化器
         model.parameters(),

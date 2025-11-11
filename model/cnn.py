@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 class simplecnn(nn.Module):
-    def __init__(self, num_class): # 分类数
+    def __init__(self, num_classes): # 分类数
         super().__init__()
         # extract features
         self.features = nn.Sequential(
@@ -25,7 +25,7 @@ class simplecnn(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(32*56*56,128),
             nn.ReLU(),
-            nn.Linear(128, num_class) # num_class为分类的个数
+            nn.Linear(128, num_classes) # num_class为分类的个数
         )
     
     def forward(self,x):
@@ -34,4 +34,7 @@ class simplecnn(nn.Module):
         x = x.view(x.size(0),-1) # 展平 x.size(0) 为batch，-1表示自动计算维度
         x = self.classifier(x)
         return x
-        
+
+def simple_cnn(num_classes:int = 1000,pretrained=False):
+    model = simplecnn(num_classes)
+    return model
