@@ -1,8 +1,8 @@
 
 import sys
-sys.path.append(r"/Users/kindle\Desktop/file/project/pytorch_nn")
+sys.path.append(r"/Users/kindle/Desktop/file/project/pytorch_nn")
 from model.resnet import resnet18, resnet50
-from model.vit_2 import vit_base_patch16_224
+from model.vit_simple import vit_base_patch16_224
 
 model_dict = {
     'resnet18': resnet18,

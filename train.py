@@ -38,7 +38,7 @@ import time  # Python中的时间相关功能
 import random  # Python中的随机数生成器
 
 parser = argparse.ArgumentParser() # 导入argparse模块，用于解析命令行参数
-parser.add_argument("--model_names", type=str, default="simplecnn") # 添加命令行参数，指定模型名称，默认为"simplecnn"
+parser.add_argument("--model_names", type=str, default="resnet18") # 添加命令行参数，指定模型名称，默认为"resnet18"
 parser.add_argument("--pre_trained", type=bool, default=False) #指定是否使用预训练模型，默认为False
 parser.add_argument("--classes_num", type=int, default=4) # 指定类别数，默认为4
 parser.add_argument("--dataset", type=str, default="data/COVID_19_Radiography_Dataset") # 指定数据集名称，默认为"new_COVID_19_Radiography_Dataset"
